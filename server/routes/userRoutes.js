@@ -60,4 +60,14 @@ router.get("/teachers", authenticateToken, async (req, res) => {
   }
 });
 
+router.post("/batch", authenticateToken, async (req, res) => {
+  try {
+    const { userIds } = req.body;
+    const users = await User.find({ _id: { $in: userIds } }, "name");
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ error: "Error fetching user details" });
+  }
+});
+
 module.exports = router;

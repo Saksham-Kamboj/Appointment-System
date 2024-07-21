@@ -100,4 +100,24 @@ router.delete("/:id", authenticateToken, async (req, res) => {
   }
 });
 
+router.get("/", authenticateToken, async (req, res) => {
+  try {
+    let appointments;
+    if (req.user.role === "Student") {
+      appointments = await Appointment.find({
+        student_id: req.user.id,
+      }).populate("teacher_id", "name");
+    } else if (req.user.role === "Teacher") {
+      appointments = await Appointment.find({
+        teacher_id: req.user.id,
+      }).populate("student_id", "name");
+    } else {
+      return res.status(403).json({ error: "Unauthorized" });
+    }
+    res.json(appointments);
+  } catch (error) {
+    res.status(500).json({ error: "Error fetching appointments" });
+  }
+});
+
 module.exports = router;
