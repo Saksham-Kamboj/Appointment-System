@@ -43,29 +43,36 @@ router.get("/", authenticateToken, async (req, res) => {
   }
 });
 
-router.put("/:id/confirm", authenticateToken, async (req, res) => {
+router.put("/:id/updateStatus", authenticateToken, async (req, res) => {
   if (req.user.role !== "Teacher") {
     return res
       .status(403)
-      .json({ error: "Only teachers can confirm appointments" });
+      .json({ error: "Only teachers can update appointment status" });
   }
 
   try {
     const appointmentId = req.params.id;
+    const { status } = req.body;
+
+    if (status !== "Confirmed" && status !== "Rejected") {
+      return res.status(400).json({ error: "Invalid status" });
+    }
+
     const appointment = await Appointment.findOneAndUpdate(
       { _id: appointmentId, teacher_id: req.user.id },
-      { status: "Confirmed" },
+      { status: status },
       { new: true }
     );
+
     if (!appointment) {
       res
         .status(404)
         .json({ error: "Appointment not found or not authorized" });
     } else {
-      res.json({ message: "Appointment confirmed successfully" });
+      res.json({ message: `Appointment ${status.toLowerCase()} successfully` });
     }
   } catch (error) {
-    res.status(500).json({ error: "Error confirming appointment" });
+    res.status(500).json({ error: "Error updating appointment status" });
   }
 });
 

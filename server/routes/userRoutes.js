@@ -51,5 +51,13 @@ router.get("/", authenticateToken, async (req, res) => {
   }
 });
 
+router.get("/teachers", authenticateToken, async (req, res) => {
+  try {
+    const teachers = await User.find({ role: "Teacher" }, "_id name");
+    res.json(teachers);
+  } catch (error) {
+    res.status(500).json({ error: "Error fetching teachers" });
+  }
+});
 
 module.exports = router;
